@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 func UrlJoin(_url string, s string) (s2 string, e error) {
@@ -12,7 +13,13 @@ func UrlJoin(_url string, s string) (s2 string, e error) {
 		return
 	}
 	Path := parse.Path
-	join := regexp.MustCompile(`[\\+|\\]`).ReplaceAllString(filepath.Join(Path, s), "/")
+	join := ""
+	if strings.HasPrefix(s, "/") {
+		join = s
+	} else {
+		join = regexp.MustCompile(`[\\+|\\]`).ReplaceAllString(filepath.Join(Path, s), "/")
+	}
+
 	s2 = parse.Scheme + "://" + parse.Host + join
 	return
 }
