@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Download(_url, file_name string) (err error) {
+func Download(_url, file_name string) (file_name2 string, err error) {
 	reqest, err := http.NewRequest("GET", _url, nil)
 	if err != nil {
 		return
@@ -29,5 +29,6 @@ func Download(_url, file_name string) (err error) {
 		return
 	}
 	_, err = io.Copy(f, res.Body)
+	file_name2 = file_name
 	return
 }
