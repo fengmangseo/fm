@@ -7,7 +7,18 @@ import (
 	"strings"
 )
 
-func Download(_url, file_name string) (file_name2 string, err error) {
+func Download(_url, file_path, file_name string) (file_name2 string, err error) {
+	b, err := PathExists(file_path)
+	if err != nil {
+		return
+	}
+	if !b {
+		err = os.MkdirAll(file_path, os.ModePerm)
+		if err != nil {
+			return
+		}
+	}
+	file_ := file_path + file_name
 	reqest, err := http.NewRequest("GET", _url, nil)
 	if err != nil {
 		return
@@ -21,14 +32,25 @@ func Download(_url, file_name string) (file_name2 string, err error) {
 	}
 
 	if !strings.Contains(file_name, ".") {
-		file_name += ".jpg"
+		file_ += ".jpg"
 	}
-	f, err := os.Create(file_name)
+	f, err := os.Create(file_)
 
 	if err != nil {
 		return
 	}
 	_, err = io.Copy(f, res.Body)
-	file_name2 = file_name
+	file_name2 = file_
 	return
+}
+
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
