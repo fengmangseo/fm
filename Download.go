@@ -40,7 +40,7 @@ func Download(_url, file_path, file_name string) (file_name2 string, err error) 
 		return
 	}
 	_, err = io.Copy(f, res.Body)
-	file_name2 = file_
+	file_name2 = strings.ReplaceAll(file_, file_path, "")
 	return
 }
 
