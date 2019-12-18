@@ -6,5 +6,5 @@ import (
 )
 
 func TestTakeChineseNumberFromString(t *testing.T) {
-	fmt.Println(TakeChineseNumberFromString("第一千零五十九章 归墟之门!"))
+	fmt.Println(DecodeToInt64("第141章 归墟之奴! 五千字"))
 }
