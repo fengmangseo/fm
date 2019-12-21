@@ -3,10 +3,13 @@
 package fm
 
 import (
+	"errors"
 	"fmt"
 	"math"
+	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 var cnNum = map[rune]int64{
@@ -122,23 +125,65 @@ func MustDecodeToInt64(cn string) int64 {
 
 // DecodeToInt64 : decode a chinese number string into Int64
 func DecodeToInt64(cn string) (int64, error) {
+
+	for _, sp := range []string{" ", ":", "："} {
+		if strings.Contains(cn, sp) {
+			cn = cn[:strings.Index(cn, sp)]
+		}
+	}
+
 	s := regexp.MustCompile(`\d{1,}`).FindString(cn)
 	if s != "" {
 		return strconv.ParseInt(s, 10, 64)
 	}
-	//提取第一个字符串数字
-	compile, e := regexp.Compile(`(?:(?:(?:[百千万]分之[正负]{0,1})|(?:[正负](?:[百千万]分之){0,1}))(?:(?:[一二三四五六七八九十千万亿兆幺零百]+(?:点[一二三四五六七八九幺零]+){0,1})|(?:点[一二三四五六七八九幺零]+)))(?:分之){0,1}|(?:(?:[一二三四五六七八九十千万亿兆幺零百]+(?:点[一二三四五六七八九幺零]+){0,1})|(?:点[一二三四五六七八九幺零]+))(?:分之){0,1}`)
-	if e != nil {
-		return 0, e
+
+	fromString := TakeChineseNumberFromString(cn)
+	cn3 := "零"
+	if reflect.TypeOf(fromString).String() == "map[string]interface {}" {
+		mf := fromString.(map[string]interface{})
+		m_list := mf["CHNumberStringList"].([]string)
+		if len(m_list) > 0 {
+			cn3 = m_list[0]
+		}
+	} else {
+		return 0, nil
 	}
-	cn = compile.FindString(cn)
-	chars := []rune(cn)
+
+	chars := []rune(cn3)
+	if len(chars) == 0 {
+		return 0, errors.New("未找到")
+	}
+
+	for _, zi := range []rune("千百十") {
+		if chars[0] == zi {
+			cn3 = "一" + cn3
+			chars = []rune(cn3)
+			break
+		}
+	}
+	for _, zi := range cnSpecialUnits {
+		if chars[0] == zi.cn {
+			cn3 = "一" + cn3
+			chars = []rune(cn3)
+			break
+		}
+	}
+	for _, zi := range cnExtremeUnits {
+		if chars[0] == zi.cn {
+			cn3 = "一" + cn3
+			chars = []rune(cn3)
+			break
+		}
+	}
+
 	return decodeToInt64(chars)
+
 }
 
 func decodeToInt64(chars []rune) (res int64, err error) {
 	// positive or negative
 	sign := int64(1)
+
 	if chars[0] == cnNegativePrefix {
 		sign = int64(-1)
 		chars = chars[1:]
@@ -148,6 +193,7 @@ func decodeToInt64(chars []rune) (res int64, err error) {
 		var left, right int64
 		for idx := len(chars) - 1; idx >= 0; idx-- {
 			if chars[idx] == specialUnit.cn {
+				fmt.Println(chars[:idx])
 				left, err = decodeToInt64(chars[:idx])
 				if err != nil {
 					return 0, err

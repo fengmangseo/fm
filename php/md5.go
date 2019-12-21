@@ -1,4 +1,4 @@
-package phptogo
+package php
 
 import (
 	"crypto/md5"
