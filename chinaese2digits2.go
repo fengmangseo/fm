@@ -1,15 +1,13 @@
-
-
 package fm
 
 import (
-"bytes"
-"fmt"
-"reflect"
-"regexp"
-"sort"
-"strconv"
-"strings"
+	"bytes"
+	"fmt"
+	"reflect"
+	"regexp"
+	"sort"
+	"strconv"
+	"strings"
 )
 
 var chineseCountingString = map[string]int{"十": 10, "百": 100, "千": 1000, "万": 10000, "亿": 100000000, "拾": 10,
