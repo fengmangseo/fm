@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetTopHost(t *testing.T) {
-	return
-	tophost, e := fm.GetTopHost("https://12423423.5346.a.com.cn/124")
+
+	tophost, e := fm.GetTopHost("5118.com")
 	t.Error(tophost, e)
 }
